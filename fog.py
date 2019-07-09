@@ -5,13 +5,7 @@
 #TODO:
 #
 # compute temp
-# handle exceptions 
 
-# DONE
-#
-# find the first message byte
-# compute checksum
-# compute angle rate
 
 import serial
 import time 
@@ -25,9 +19,9 @@ class FogException(Exception):
 
 class Fog():
 
-    def __init__(self, port='/dev/ttyS0', baudrate=9600, stopbits=1, parity='N', timeout=2, verbose = False):
+    def __init__(self, port='/dev/ttyS0', baudrate=9600, stopbits=1, parity='N', timeout=10,verbose=False):
 
-        self.device = serial.Serial(port,baudrate)
+        self.device = serial.Serial(port, baudrate, timeout=timeout)
         self.timeout = timeout
         self.verbose = verbose
 
@@ -39,17 +33,18 @@ class Fog():
 
     def get_sample(self):
         """Low-level message receiving"""
-        if self.device.
+    
         start = time.time()
         while (time.time()-start) < self.timeout: # add here timeout exception
-            time.time()-start
             buff = bytearray(self.device.read())
+            if len(buff) == 0:
+                raise FogException('Unable to read sample from fog!')
             if buff[0] & 0x80:
                 buffer = bytearray(self.device.read(7))
                 if self.verbose:
                     print "buffer size:" + str(len(buffer)) 
                 break
-                
+        
         # compute checksum
         received_checksum = (buff[0] & 0x7f) << 1
         received_checksum |= (buffer[0] >> 6) & 1
@@ -79,7 +74,7 @@ class Fog():
         checksum = checksum & 0xff
 
         if checksum != received_checksum:
-            raise FOGException('Error when validating checksum!')
+            raise FOGException('Error when validating checksum.')
         if self.verbose:
             print "computed checksum: " + str(checksum)
 
@@ -87,7 +82,8 @@ class Fog():
         built_in_test = (buffer[2] >> 4) & 1
         if self.verbose:
             print "built in test bit: "+ str(built_in_test) #handle BIT error
-
+        if not built_in_test:
+            raise FogException('Built in test failed.')
         # calc temperature message 
         raw_temp = ((buffer[3] & 7) << 5)
         raw_temp |= (buffer[4] >> 2) & 0x1f
@@ -113,9 +109,9 @@ class Fog():
         return angle_rate , built_in_test
 
 def main():
-    fog = Fog('/dev/ttyS0')
+    fog = Fog('/dev/ttyS0',verbose=True)
     while True:
-        fog.get_sample(verbose=True)
+        fog.get_sample()
         
 
-if __name__ == '__main__':main()
+if __name__ == '__main__' : main()
