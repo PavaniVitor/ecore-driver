@@ -15,6 +15,7 @@
 import serial
 import time 
 
+
 class Fog():
 
     def __init__(self, port='/dev/ttyS0', baudrate=9600, stopbits=1, parity='N', timeout=10):
@@ -62,7 +63,11 @@ class Fog():
         built_in_test = (buffer[2] >> 4) & 1
         print built_in_test #handle BIT error
 
-        
+        # calc temperature message 
+        raw_temp = ((buffer[3] & 7) << 5)
+        raw_temp |= (buffer[4] >> 2) & 0x1f
+
+                
                                            
 def main():
     fog = Fog('/dev/ttyS0')
