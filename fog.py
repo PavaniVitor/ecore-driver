@@ -4,21 +4,29 @@
 
 #TODO:
 #
-# compute gyro rate and temp
+# compute temp
 # handle exceptions 
 
 # DONE
 #
 # find the first message byte
 # compute checksum
+# compute angle rate
 
 import serial
 import time 
 
+class FogException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
 
 class Fog():
 
-    def __init__(self, port='/dev/ttyS0', baudrate=9600, stopbits=1, parity='N', timeout=10, verbose = True):
+    def __init__(self, port='/dev/ttyS0', baudrate=9600, stopbits=1, parity='N', timeout=2, verbose = False):
+
         self.device = serial.Serial(port,baudrate)
         self.timeout = timeout
         self.verbose = verbose
@@ -31,7 +39,10 @@ class Fog():
 
     def get_sample(self):
         """Low-level message receiving"""
-        while True: # add here timeout exception
+        if self.device.
+        start = time.time()
+        while (time.time()-start) < self.timeout: # add here timeout exception
+            time.time()-start
             buff = bytearray(self.device.read())
             if buff[0] & 0x80:
                 buffer = bytearray(self.device.read(7))
@@ -67,12 +78,15 @@ class Fog():
         # mask checksum to 16bits integer
         checksum = checksum & 0xff
 
+        if checksum != received_checksum:
+            raise FOGException('Error when validating checksum!')
         if self.verbose:
             print "computed checksum: " + str(checksum)
 
         # Built-In Test
         built_in_test = (buffer[2] >> 4) & 1
-        print built_in_test #handle BIT error
+        if self.verbose:
+            print "built in test bit: "+ str(built_in_test) #handle BIT error
 
         # calc temperature message 
         raw_temp = ((buffer[3] & 7) << 5)
@@ -96,12 +110,12 @@ class Fog():
         if self.verbose:
             print "angle: " + str(angle_rate)                       
 
-        return angle_rate
+        return angle_rate , built_in_test
 
 def main():
     fog = Fog('/dev/ttyS0')
     while True:
-        fog.get_sample()
-
+        fog.get_sample(verbose=True)
+        
 
 if __name__ == '__main__':main()
