@@ -106,7 +106,7 @@ class Fog():
         if self.verbose:
             print "angle: " + str(angle_rate)                       
 
-        return angle_rate , built_in_test
+        return angle_rate
 
 def main():
     fog = Fog('/dev/ttyS0',verbose=True)
