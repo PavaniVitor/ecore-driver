@@ -17,6 +17,7 @@ class FogException(Exception):
     def __str__(self):
         return self.message
 
+    
 class Fog():
 
     def __init__(self, port='/dev/ttyS0', baudrate=9600, stopbits=1, parity='N', timeout=10,verbose=False):
@@ -106,7 +107,27 @@ class Fog():
         if self.verbose:
             print "angle: " + str(angle_rate)                       
 
-        return angle_rate
+        return checksum, received_checksum, built_in_test, raw_temp, angle_rate
+
+    def get_angle(self):
+        """wrapper to retrieve angle reading"""
+        return self.get_sample()[4]
+        
+class FogMessage():
+    """class to handle Fog messages"""
+    def __init__(self, sample):
+        self.checksum = sample[0]
+        self.received_checksum = sample[1]
+        self.built_in_test = sample[2]
+        self.raw_temp = sample[3]
+        self.angle_rate = [4]
+
+    def get_temp(self,another_sample):
+        """method to retrieve temperature readings from two samples"""
+        pass 
+                
+    def __str__(self):
+        pass    
 
 def main():
     fog = Fog('/dev/ttyS0',verbose=True)
