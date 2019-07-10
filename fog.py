@@ -123,7 +123,7 @@ class FogMessage():
         if self.raw_temp & 0x80 and not another_sample.raw_temp & 0x80:
             msg1 = self
             msg2 = another_sample
-        elif not self.raw_temp & 0x80 and another_sample & 0x80: 
+        elif not self.raw_temp & 0x80 and another_sample.raw_temp & 0x80: 
             msg1 = another_sample
             msg2 = self
         else:
