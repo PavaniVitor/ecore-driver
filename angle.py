@@ -1,4 +1,4 @@
-from fog import Fog, FogException
+from fog import Fog
 import numpy as np
 
 def main():
@@ -13,7 +13,9 @@ def main():
             angles = np.append(angles,angle)
         except KeyboardInterrupt:
             break
-        abs_angle = np.trapz(angles,dx=2)
-        print "abs angle: " + str(abs_angle)        
+        except FogException:
+            print 'there is a problem with Fog.'
+        head_angle = np.trapz(angles,dx=2)
+        print "heading angle: " + str(abs_angle)        
 
 if __name__=='__main__' : main()
