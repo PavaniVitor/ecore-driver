@@ -74,7 +74,7 @@ class Fog():
         checksum = checksum & 0xff
 
         if checksum != received_checksum:
-            raise FOGException('Error when validating checksum.')
+            raise FogException('Error when validating checksum.')
         if self.verbose:
             print "computed checksum: " + str(checksum)
 
@@ -84,25 +84,25 @@ class Fog():
             print "built in test bit: "+ str(built_in_test) #handle BIT error
         if not built_in_test:
             raise FogException('Built in test failed.')
+
         # calc temperature message 
         raw_temp = ((buffer[3] & 7) << 5)
         raw_temp |= (buffer[4] >> 2) & 0x1f
 
         #calc angle rate
-    
         angle_rate = ((buffer[4] & 3) << 14) | ((buffer[5] & 0x7f) << 7) | (buffer[6] & 0x7f)
         angle_rate = angle_rate & 0xFFFFFFFF
 
+        #sign extension
         if angle_rate & 0x8000:
             angle_rate |= 0xFFFF0000
-            
         else:
             angle_rate &= 0x0000FFFF      
 
         angle_rate = angle_rate & 0xFFFFFFFF
         angle_rate = self.twos_comp(angle_rate, 32)
-        
         angle_rate = angle_rate * 0.000305 
+
         if self.verbose:
             print "angle: " + str(angle_rate)                       
 
