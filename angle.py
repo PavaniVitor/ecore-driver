@@ -4,7 +4,7 @@ import numpy as np
 def main():
     fog = Fog('/dev/ttyS0')
     angles = np.array([])
-    filter_value = 0.1
+    filter_value = 0.0
     while True:
         try:
             angle = fog.get_sample()
@@ -16,6 +16,6 @@ def main():
         except FogException:
             print 'there is a problem with Fog.'
         head_angle = np.trapz(angles,dx=2)
-        print "heading angle: " + str(abs_angle)        
+        print "heading angle: " + str(head_angle)        
 
 if __name__=='__main__' : main()
