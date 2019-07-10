@@ -89,6 +89,8 @@ class Fog():
         # calc temperature message 
         raw_temp = ((buffer[3] & 7) << 5)
         raw_temp |= (buffer[4] >> 2) & 0x1f
+        if self.verbose:
+            print "raw temperature: " + str(raw_temp)
 
         #calc angle rate
         angle_rate = ((buffer[4] & 3) << 14) | ((buffer[5] & 0x7f) << 7) | (buffer[6] & 0x7f)
@@ -120,14 +122,16 @@ class FogMessage():
         self.received_checksum = sample[1]
         self.built_in_test = sample[2]
         self.raw_temp = sample[3]
-        self.angle_rate = [4]
+        self.angle_rate = sample[4]
 
     def get_temp(self,another_sample):
         """method to retrieve temperature readings from two samples"""
         pass 
                 
     def __str__(self):
-        pass    
+        return "Checksum: " + str(self.checksum) + "\nReceived Checksum: " + str(self.received_checksum)\
+        +"\nBuilt in test: " + str(self.built_in_test)+"\nRaw temperature: " + str(self.raw_temp)\
+        +"\nAngle Rate: " + str(self.angle_rate)    
 
 def main():
     fog = Fog('/dev/ttyS0',verbose=True)
