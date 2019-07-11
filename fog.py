@@ -148,7 +148,7 @@ class FogMessage():
 
 
 def main():
-    fog = Fog('/dev/ttyS0',verbose=True)
+    fog = Fog('/dev/ttyS0')
     while True:
         message = FogMessage(fog.get_sample())
         print message
