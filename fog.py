@@ -6,8 +6,53 @@ import time
 
 
 class FogException(Exception):
+    """Base exception class, use if you want to catch all exceptions raised by Fog"""
+
     def __init__(self, message):
         self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class ReadError(FogException):
+    """Error raised when Fog class in unable to retrieve any byte from serial port"""
+
+    def __init__(self, message=None):
+        if message is None:
+            self.message = "Unable to read a byte from Fog"
+
+    def __str__(self):
+        return self.message
+
+
+class BuiltInTestError(FogException):
+    """Error raised when built in test bit is 0"""
+
+    def __init__(self):
+        self.message = "Bultin test failed, value: 0 Expected: 1"
+
+    def __str__(self):
+        return self.message
+
+
+class ChecksumError(FogException):
+    """Error raised when computed checksum differs from received checksum"""
+
+    def __init__(self, received_checksum, computed_checksum):
+        self.message = "Checksum failed, received checksum: " + \
+            str(received_checksum)+" Received Checksum: "+str(received_checksum)
+        self.received_checksum = received_checksum
+        self.computed_checksum = computed_checksum
+
+    def __str__(self):
+        return self.message
+
+
+class TemperatureError(FogException):
+    def __init__(self, message=None):
+        if message is None:
+            self.message = "Unable to compute temperature from samples."
 
     def __str__(self):
         return self.message
@@ -32,10 +77,10 @@ class Fog():
         """Low-level message receiving"""
 
         start = time.time()
-        while (time.time()-start) < self.timeout:  # add here timeout exception
+        while (time.time()-start) < self.timeout:
             buff = bytearray(self.device.read())
             if len(buff) == 0:
-                raise FogException('Unable to read sample from fog!')
+                raise ReadError()
             if buff[0] & 0x80:
                 buffer = bytearray(self.device.read(7))
                 if self.verbose:
@@ -81,7 +126,7 @@ class Fog():
             # handle BIT error
             print "built in test bit: " + str(built_in_test)
         if not built_in_test:
-            raise FogException('Built in test failed.')
+            raise BuiltInTestError()
 
         # calc temperature message
         raw_temp = ((buffer[3] & 7) << 5)
@@ -133,8 +178,8 @@ class FogMessage():
             msg1 = another_sample
             msg2 = self
         else:
-            pass
-            # error
+            raise TemperatureError()
+
         temp = msg1.raw_temp & 0x7f
         temp |= (msg2.raw_temp & 0x1f) << 7
 
