@@ -1,3 +1,1 @@
-numpy==1.16.4
-keyboard==0.13.3
 pyserial==3.0.1
